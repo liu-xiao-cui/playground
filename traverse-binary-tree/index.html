@@ -1,0 +1,183 @@
+<!DOCTYPE>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>遍历二叉树</title>
+    <style>
+        #container div {
+            display: flex;
+            border: 1px solid black;
+            padding: 5%;
+            background: white;
+        }
+
+        #container > div {
+            height: 200px;
+            max-width: 1000px;
+        }
+
+        #container > div div {
+            flex-grow: 1;
+        }
+
+        #container > div div:first-of-type {
+            margin-right: 3%;
+        }
+
+        #container div.active {
+            background-color: lightblue;
+        }
+
+        #container div.done {
+            background-color: lightgreen;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <br />
+    <button id="forward-btn">前序</button>
+    <button id="middle-btn">中序</button>
+    <button id="backward-btn">后序</button>
+
+    <script src="utils.js"></script>
+    <script type="text/javascript">
+        // 树的 level
+        const TREE_LEVEL = 4
+
+        function main() {
+            initiateContainer()
+            addBtnListener()
+        }
+
+        // 根据 TREE_LEVEL 去初始化 container
+        function initiateContainer() {
+            let level = 1
+            let innerHTML = '<div></div>'
+            while (level < TREE_LEVEL) {
+                innerHTML = `
+                    <div>
+                        ${innerHTML}${innerHTML}
+                    </div>
+                `
+                level++
+            }
+            container.innerHTML = innerHTML
+            container.firstElementChild.id = 'treeRoot'
+        }
+        // 监听按钮的点击事件
+        function addBtnListener() {
+            [
+                ['forward-btn', forwardTraverse],
+                ['middle-btn', middleTraversal],
+                ['backward-btn', backwardTraversal],
+            ].forEach(item => {
+                const [id, callback] = item
+                const btn = document.querySelector(`#${id}`)
+                btn.addEventListener('click', callback)
+            })
+        }
+        // 前序遍历
+        function forwardTraverse() {
+            const startEle = treeRoot
+            runTraversal(startEle, getNextForwardTraversalEle)
+        }
+        // 中序遍历
+        function middleTraversal() {
+            const startEle = getMostLeftEle(treeRoot)
+            runTraversal(startEle, getNextMiddleTraversalEle)
+        }
+        // 后序遍历
+        function backwardTraversal() {
+            const startEle = getMostLeftEle(treeRoot)
+            runTraversal(startEle, getNextBackwardTraversalEle)
+        }
+        // 进行遍历
+        // 不同的遍历方法传进来的 getNextTraversalEle 不一样
+        function runTraversal(element, getNextTraversalEle) {
+            element.className = 'active'
+            setTimeout(() => {
+                element.className = 'done'
+                setTimeout(() => {
+                    const nextEle = getNextTraversalEle(element)
+                    if (nextEle) {
+                        runTraversal(nextEle, getNextTraversalEle)
+                    } else {
+                        // 重新初始化（为了清掉类名）
+                        initiateContainer()
+                    }
+                }, 600)
+            }, 600)
+        }
+        // 拿到进行前序遍历的下一个元素
+        function getNextForwardTraversalEle(element) {
+            // 有左子节点 --> 左子节点
+            // 没有左子节点 且 有右兄弟节点 --> 右兄弟节点
+            // 没有左子节点 且 没有右兄弟节点 --> 第一个有兄弟节点的父节点的兄弟节点  --> 父节点等于容器则表示遍历结束
+            if (element.firstElementChild) {
+                return element.firstElementChild
+            }
+            if (element.nextElementSibling) {
+                return element.nextElementSibling
+            }
+            let end = false
+            let parent = element.parentElement
+            while (!end) {
+                if (parent === treeRoot) {
+                    return
+                }
+                const nextElementSibling = parent.nextElementSibling
+                if (nextElementSibling) {
+                    end = true
+                } else {
+                    parent = parent.parentElement
+                }
+            }
+            return parent.nextElementSibling
+        }
+        // 拿到进行中序遍历的下一个元素
+        function getNextMiddleTraversalEle(element) {
+            // 有右子节点 --> 右子节点的根左节点
+            // 没有子节点 且 有右兄弟节点 --> 父节点
+            // 没有子节点 且 没有右兄弟节点 --> 第一个父元素，它的根右节点不是它 --> 父节点等于容器则表示遍历结束
+            if (element.childElementCount) {
+                return getMostLeftEle(element.lastElementChild)
+            }
+            if (element.nextElementSibling) {
+                return element.parentElement
+            }
+            let end = false
+            let parent = element.parentElement
+            while (!end) {
+                const rootEle = getMostRightEle(parent)
+                if (rootEle === element) {
+                    if (parent === treeRoot) {
+                        return
+                    }
+                    parent = parent.parentElement
+                } else {
+                    end = true
+                }
+            }
+            return parent
+        }
+        // 拿到进行后序遍历的下一个元素
+        function getNextBackwardTraversalEle(element) {
+            // 没有右兄弟节点 --> 父节点 --> 父节点等于容器则表示遍历结束
+            // 有右兄弟节点 --> 右兄弟节点的根左节点
+            if (element === treeRoot) {
+                return
+            }
+            if (!element.nextElementSibling) {
+                return element.parentElement
+            }
+            return getMostLeftEle(element.nextElementSibling)
+        }
+
+        main()
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>modal 组件</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <br/>
+    <button id="open-modal-btn">打开弹窗</button>
+    <br><br><hr>
+    <div id="description"></div>
+
+    <script src="description.js"></script>
+    <script src="modal.js"></script>
+    <script>
+        // 初始化说明文本
+        const div = document.querySelector('#description')
+        div.innerText = description
+
+        // 实例化一个 modal
+        const modal = new Modal()
+        // modal 的 config
+        const modalConfig = {
+            title: 'modal title',
+            content: 'modal content',
+            width: '400px',
+            // height: '300px',
+            onCancel: () => {
+                console.log('onCancel')
+                modal.close()
+            },
+            onOk: () => {
+                console.log('onOk')
+                modal.close()
+            },
+        }
+        // 创建 modal，即挂载 modal 到 dom 中
+        modal.create(modalConfig)
+
+        // 监听按钮的点击事件
+        const btn = document.querySelector('#open-modal-btn')
+        btn.addEventListener('click', () => modal.open())
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>听指令的小方块</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="board-wrapper"></div>
+    <br />
+    <div class="operate">
+        <input type="text" id="input" value="GO" />
+        <button id="execute-btn">执行</button>
+    </div>
+    <br />
+    <hr />
+    <div id="description"></div>
+    <br />
+
+    <script src="description.js"></script>
+    <script src="utils.js"></script>
+    <script>
+        // 棋盘的边长
+        const SIZE = 10
+        // 指令--函数
+        const instructionToFunc = {
+            'GO': go,
+            'TUN LEF': () => turn('left'),
+            'TUN RIG': () => turn('right'),
+            'TUN BAC': () => turn('back'),
+            'TRA LEF': goLeft,
+            'TRA RIG': goRight,
+            'TRA TOP': goUp,
+            'TRA BOT': goDown,
+            'MOV LEF': () => turnAndGo('left'),
+            'MOV RIG': () => turnAndGo('right'),
+            'MOV TOP': () => turnAndGo('up'),
+            'MOV BOT': () => turnAndGo('down'),
+        }
+
+        function main() {
+            // 初始化 html
+            initiateDescription()
+            initiateBoard()
+            initiateBlock()
+            // 监听事件
+            const btn = document.querySelector('#execute-btn')
+            btn.addEventListener('click', () => {
+                const value = input.value
+                const func = instructionToFunc[value]
+                if (!func) {
+                    alert('未匹配到指令，请重新输入')
+                    return
+                }
+                func()
+            })
+        }
+
+        // 初始化描述文本
+        function initiateDescription() {
+            const div = document.querySelector('#description')
+            div.innerText = description
+        }
+
+        // 初始化行数，列数，棋盘
+        function initiateBoard() {
+            const positionDivs = Array(SIZE).fill('').map((item, index) => `<div>${index + 1}</div>`).join('')
+            const emptyDivs = Array(SIZE).fill('<div></div>').join('')
+            const boardDiv = Array(SIZE).fill(emptyDivs).join('')
+
+            const topDiv = `<div class="column-position">${positionDivs}</div>`
+            const leftDiv = `<div class="row-position">${positionDivs}</div>`
+
+            const wrapper = document.querySelector('#board-wrapper')
+            wrapper.innerHTML = `
+                ${topDiv}
+                <div>
+                    ${leftDiv}
+                    <div id="board">${boardDiv}</div>
+                </div>
+            `
+        }
+        // 初始化小方块，给一个随机位置和方向
+        function initiateBlock() {
+            const className = ['up', 'down', 'left', 'right'][randomNum(4)]
+            const top = `${randomNum(SIZE) * 30}px`
+            const left = `${randomNum(SIZE) * 30}px`
+            const block = `
+                <div id="block" class="${className}" style="top:${top}; left:${left}">
+                    <div></div>
+                    <div></div>
+                </div>
+            `
+            board.insertAdjacentHTML('beforeend', block)
+        }
+
+        // 向当前方向移动一格
+        function go() {
+            // 当前方向所对应的移动函数
+            const goFuncMap = {
+                up: goUp,
+                down: goDown,
+                right: goRight,
+                left: goLeft
+            }
+            goFuncMap[block.className]()
+        }
+        // 向上移动
+        function goUp() {
+            const top = Number(block.style.top.slice(0, -2))
+            if (top <= 0) {
+                alert('已经抵达边缘，无法继续前进')
+                return
+            }
+            block.style.animation = `0.5s go-up forwards`
+            setTimeout(() => {
+                block.style.top = `${top - 30}px`
+                block.style.animation = ''
+            }, 500)
+        }
+        // 向下移动
+        function goDown() {
+            const top = Number(block.style.top.slice(0, -2))
+            if (top >= 270) {
+                alert('已经抵达边缘，无法继续前进')
+                return
+            }
+            block.style.animation = `0.5s go-down forwards`
+            setTimeout(() => {
+                block.style.top = `${top + 30}px`
+                block.style.animation = ''
+            }, 500)
+        }
+        // 向右移动
+        function goRight() {
+            const left = Number(block.style.left.slice(0, -2))
+            if (left >= 270) {
+                alert('已经抵达边缘，无法继续前进')
+                return
+            }
+            block.style.animation = `0.5s go-right forwards`
+            setTimeout(() => {
+                block.style.left = `${left + 30}px`
+                block.style.animation = ''
+            }, 500)
+        }
+        // 向左移动
+        function goLeft() {
+            const left = Number(block.style.left.slice(0, -2))
+            if (left <= 0) {
+                alert('已经抵达边缘，无法继续前进')
+                return
+            }
+            block.style.animation = `0.5s go-left forwards`
+            setTimeout(() => {
+                block.style.left = `${left - 30}px`
+                block.style.animation = ''
+            }, 500)
+        }
+
+        // 转动
+        function turn(instruct) {
+            // 方向（即类名）--角度
+            const classNameToAngle = {
+                up: 0,
+                right: 90,
+                down: 180,
+                left: 270,
+            }
+            // 角度--方向（即类名）
+            const angleToClassName = {
+                0: 'up',
+                90: 'right',
+                180: 'down',
+                270: 'left',
+            }
+
+            block.style.animation = `0.8s turn-${instruct} forwards`
+            setTimeout(() => {
+                const angle = classNameToAngle[block.className]
+                const newAngle = calculateTurnAngle(instruct, angle)
+                block.className = angleToClassName[newAngle]
+                block.style.animation = ''
+            }, 800)
+        }
+        // 计算需要旋转的角度
+        // instruct 转动指令
+        // angle 当前的角度
+        function calculateTurnAngle(instruct, angle) {
+            if (instruct === 'left') {
+                return (angle - 90 + 360) % 360
+            }
+            if (instruct === 'right') {
+                return (angle + 90) % 360
+            }
+            // instruct === 'back'
+            return (angle + 180) % 360
+        }
+
+        // 移动
+        function turnAndGo(newDirection) {
+            const currentDirection = block.className
+            if (currentDirection === newDirection) {
+                go()
+                return
+            }
+
+            // 移动所对应的指令
+            const moveInstructMap = {
+                up: {
+                    down: 'back',
+                    left: 'right',
+                    right: 'left'
+                },
+                down: {
+                    up: 'back',
+                    left: 'left',
+                    right: 'right'
+                },
+                left: {
+                    up: 'left',
+                    down: 'right',
+                    right: 'back',
+                },
+                right: {
+                    up: 'right',
+                    down: 'left',
+                    left: 'back',
+                },
+            }
+            const instruct = moveInstructMap[newDirection][currentDirection]
+            turn(instruct)
+            setTimeout(go, 800)
+        }
+
+        main()
+    </script>
+</body>
+
+</html>

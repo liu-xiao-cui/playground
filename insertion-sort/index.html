@@ -1,0 +1,158 @@
+<!DOCTYPE>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>插入排序原理的动态演示</title>
+    <style>
+        #container {
+            display: flex;
+            align-items: flex-end;
+            height: 150px;
+        }
+
+        .number-block {
+            width: 22px;
+            margin: 0 4px;
+            transition: transform 0.3s;
+        }
+
+        .number-block > div:last-child {
+            background: lightblue;
+        }
+
+        .number-block.active {
+            transform: translateY(180px);
+        }
+
+        .number-block.done > div:last-child {
+            background: lightgreen;
+        }
+
+        .number-block.before > div:last-child {
+            background: orange;
+        }
+
+        .number-block.move-left {
+            transform: translate(-30px, 180px);
+        }
+
+        .number-block.move-right {
+            transform: translateX(30px);
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button id="re-initiate-btn">重新生成队列</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button id="sort-btn">排序</button>
+    </div>
+    <br /><br />
+    <div id="container"></div>
+
+    <script type="text/javascript">
+        function main() {
+            initiateContainer()
+            addBtnListener()
+        }
+        // 初始化一个随机数组
+        function initiateContainer() {
+            let numbers = []
+            while(numbers.length < 10) {
+                numbers.push(getRandomNumber(10, 100))
+            }
+            container.innerHTML = numbers.map(getNumberBlockHtml).join('')
+        }
+        // 拿到一个 a 和 b 之间的随机数，包含 a 和 b
+        function getRandomNumber(a, b) {
+            const diff = Math.abs(b - a)
+            return Math.floor(Math.random() * (diff + 1)) + a
+        }
+        // 根据数字拿到一个 block 的 html
+        function getNumberBlockHtml(number) {
+            return `
+                <div data-number=${number} class="number-block">
+                    <div>${number}</div>
+                    <div style="height:${number * 1.5}"></div>
+                </div>
+            `
+        }
+        // 监听按钮的点击事件
+        function addBtnListener() {
+            const reInitiateBtn = document.querySelector('#re-initiate-btn')
+            reInitiateBtn.addEventListener('click', initiateContainer)
+
+            const sortBtn = document.querySelector('#sort-btn')
+            sortBtn.addEventListener('click', () => sortStart())
+        }
+        // 开始进行一个元素的排序，默认从第二个元素开始排序
+        function sortStart(index = 1, doneLength = 1) {
+            const current = container.children[index]
+            current.className = 'number-block active'
+            setTimeout(() => {
+                sortDuring(index, doneLength)
+            }, 600)
+        }
+        // 一个元素的排序过程
+        function sortDuring(index, doneLength) {
+            if (index === 0) {
+                sortEnd(index, doneLength)
+                return
+            }
+            
+            const current = container.children[index]
+            const before = container.children[index - 1]
+            before.className = 'number-block before'
+
+            setTimeout(() => {
+                // 进行比较看是否需要交换位置
+                const needExchange = Number(before.dataset.number) > Number(current.dataset.number)
+
+                if (!needExchange) {
+                    setTimeout(() => {
+                        sortEnd(index, doneLength)
+                    }, 600)
+                    return
+                }
+
+                current.className = 'number-block active move-left'
+                before.className = 'number-block before move-right'
+
+                setTimeout(() => {
+                    current.className = 'number-block active'
+                    before.className = 'number-block done'
+                    // 在 dom 中交换 current 和 before 的位置
+                    const temp = before
+                    before.replaceWith(current)
+                    current.insertAdjacentElement('afterend', temp)
+
+                    setTimeout(() => {
+                        sortDuring(index - 1, doneLength)
+                    }, 600)
+                }, 600)
+            }, 600)
+        }
+        // 一个元素完成了排序
+        function sortEnd(index, doneLength) {
+            const current = container.children[index]
+            current.className = 'number-block done'
+            if (index > 0) {
+                // current 之前的那个元素的类名要改为 done
+                const before = container.children[index - 1]
+                before.className = 'number-block done'
+            }
+            if (doneLength + 1 < container.children.length) {
+                setTimeout(() => {
+                    sortStart(doneLength + 1, doneLength + 1)
+                }, 600)
+            }
+        }
+
+        main()
+    </script>
+</body>
+
+</html>

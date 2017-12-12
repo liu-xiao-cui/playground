@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>动态数据绑定（四）</title>
+        <style media="screen">
+            code {
+                font-size: 16px;
+                white-space: pre-wrap;
+                font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <p>firstName：{{user.name.first}}</p>
+            <p>lastName：{{user.name.last}}</p>
+            <p>年龄：{{user.age}}</p>
+        </div>
+        <hr />
+        <pre><code id='example-container'></code></pre>
+        <br />
+        
+        <script src="example.js"></script>
+        <script src="util.js"></script>
+        <script src="vue.js"></script>
+        <script>
+            const element = document.querySelector('#example-container')
+            element.innerText = EXAMPLE
+        </script>
+    </body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>动态数据绑定（五）</title>
+        <style media="screen">
+            code {
+                font-size: 16px;
+                white-space: pre-wrap;
+                font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <p>firstName：{{user.name.first}}</p>
+            <p>lastName：{{user.name.last}}</p>
+            <p>年龄：{{user.age}}</p>
+        </div>
+        <div>
+            firstName：<input id='firstName'><br>
+            lastName：<input id='lastName'><br>
+            年龄：<input id='age'><br>
+            学校：<input id='school'><br>
+        </div>
+        <br><hr><br>
+        <div>输入框中的值变化时，页面显示会跟着变化</div>
+
+        <script src="util.js"></script>
+        <script src="observer.js"></script>
+        <script src="vue.js"></script>
+        <script>
+            const data = {
+                user: {
+                    name: {
+                        first: 'young',
+                        last: 'wind',
+                    },
+                    age: 25,
+                },
+                school: 'bupt',
+            }
+            new Vue({
+                el: '#app',
+                data,
+            });
+
+            firstName.addEventListener('input', e => {
+                data.user.name.first = e.target.value
+            })
+            lastName.addEventListener('input', e => {
+                data.user.name.last = e.target.value
+            })
+            age.addEventListener('input', e => {
+                data.user.age = e.target.value
+            })
+            school.addEventListener('input', e => {
+                data.school = e.target.value
+            })
+        </script>
+    </body>
+</html>

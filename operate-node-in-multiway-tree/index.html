@@ -1,0 +1,126 @@
+<!DOCTYPE>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>多叉树节点的新增和删除</title>
+    <style>
+        #container div {
+            display: flex;
+            border: 1px solid black;
+            padding: 8px 4px;
+            margin: 4px;
+            background: white;
+            cursor: pointer;
+        }
+
+        #container > div {
+            min-height: 200px;
+        }
+
+        #container > div div {
+            flex-grow: 1;
+            flex-wrap: wrap;
+        }
+
+        #container div.active {
+            background-color: lightblue;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <br />
+    <button id="delete-btn">删除</button> &nbsp;&nbsp;&nbsp;&nbsp;
+    <input type="text" id='input' />
+    <button id="add-btn">添加</button>
+
+    <br><br><hr><br>
+    <div>鼠标选中节点后点击删除即可删除，点击添加则添加到该节点下</div>
+
+    <script src="treeConfig.js"></script>
+    <script type="text/javascript">
+        // 全局变量 记录 选中的元素
+        let activeElement
+
+        function main() {
+            initiateContainer()
+            addListener()
+        }
+
+        // 初始化 container
+        function initiateContainer() {
+            container.innerHTML = mapChildrenToHtml([treeConfig])
+            container.firstElementChild.id = 'treeRoot'
+        }
+        // 把 treeConfig 中的 children 给解析成 html
+        function mapChildrenToHtml(children) {
+            return children.map(item => {
+                const {text, children} = item
+                return `
+                    <div>
+                        ${text}
+                        ${mapChildrenToHtml(children)}
+                    </div>
+                `
+            }).join('')
+        }
+
+        // 监听事件
+        function addListener() {
+            // 监听删除和添加按钮
+            [
+                ['delete-btn', onDelete],
+                ['add-btn', onAdd],
+            ].forEach(item => {
+                const [id, callback] = item
+                const btn = document.querySelector(`#${id}`)
+                btn.addEventListener('click', callback)
+            })
+            // 监听输入过程中按下 enter
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Enter' && document.activeElement.id === 'input') {
+                    onAdd()
+                }
+            })
+            // 监听点击选择 div 事件
+            treeRoot.addEventListener('click', e => {
+                e.stopPropagation()
+                if (activeElement) {
+                    // 清掉之前选择的元素的样式
+                    activeElement.className = ''
+                }
+                e.target.className = 'active'
+                // 缓存选择的元素
+                activeElement = e.target
+            })
+        }
+        // 删除选中的节点
+        function onDelete() {
+            if (!activeElement) {
+                alert('请先选择节点')
+                return
+            }
+            activeElement.remove()
+            activeElement = undefined
+        }
+        // 添加节点
+        function onAdd() {
+            if (!activeElement) {
+                alert('请先选择节点')
+                return
+            }
+            const value = input.value
+            if (!value) {
+                alert('请先输入内容')
+                return
+            }
+            activeElement.insertAdjacentHTML('beforeend', `<div>${value}</div>`)
+        }
+
+        main()
+    </script>
+</body>
+
+</html>

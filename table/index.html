@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>table 组件</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <svg style="display: none">
+        <!-- 排序图标-朝上的三角形 -->
+        <symbol id="arrow-up">
+            <title>↑</title>
+            <polygon points="2 7, 14 7, 8 0"></polygon>
+        </symbol>
+        <!-- 排序图标-朝下的三角形 -->
+        <symbol id="arrow-down">
+            <title>↓</title>
+            <polygon points="2 1, 14 1, 8 8"></polygon>
+        </symbol>
+    </svg>
+
+    <div id="container"></div>
+
+    <script src="sorter.js"></script>
+    <script src="table.js"></script>
+    <script>
+        // 表格列的配置
+        const columns = [
+            {title: '姓名', dataIndex: 'name'},
+            {title: '语文', dataIndex: 'chinese', sorter: true},
+            {title: '数学', dataIndex: 'math', sorter: true},
+            {title: '英语', dataIndex: 'english', sorter: true},
+            {title: '总分', key: 'total', render: rowData => rowData.chinese + rowData.english + rowData.math, sorter: true},
+            {title: '先按数学排序，再按语文排序', key: 'custom', render: rowData => `${rowData.math}, ${rowData.chinese}`, sortOrder: 'descend', sorter: (a, b) => {
+                if(a.math > b.math) {
+                    return 1
+                }
+                if(a.math === b.math) {
+                    return a.chinese - b.chinese
+                }
+                return -1
+            }},
+        ]
+        // 表格的数据源
+        const dataSource = [
+            {name: '小明', chinese: 90, math: 80, english: 80},
+            {name: '小红', chinese: 80, math: 80, english: 90},
+            {name: '小亮', chinese: 60, math: 100, english: 70},
+        ]
+        // 实例化
+        new Table({container, columns, dataSource})
+    </script>
+</body>
+
+</html>

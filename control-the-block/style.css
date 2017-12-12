@@ -1,0 +1,169 @@
+button,
+input[type='text'] {
+    border-radius: 4px;
+}
+
+button:focus,
+input[type='text']:focus {
+    outline: none;
+}
+
+button {
+    color: white;
+    background-color: #2e78b9;
+    border-width: 0;
+    cursor: pointer;
+    padding: 0 6px;
+    transition: background-color 0.3s;
+    line-height: 28px;
+}
+
+button:hover {
+    background-color: #53a1d4;
+}
+
+input[type='text'] {
+    border: 1px solid #bbb;
+    padding: 0 4px;
+    line-height: 26px;
+    transition: border-color 0.3s;
+}
+
+input[type='text']:focus,
+input[type='text']:hover {
+    border-color: #2e78b9;
+}
+
+#board-wrapper > div {
+    display: flex;
+}
+
+.column-position {
+    margin-left: 30px;
+}
+
+.column-position > div,
+.row-position > div {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+}
+
+#board {
+    display: flex;
+    flex-wrap: wrap;
+    width: 299px;
+    position: relative;
+    border: 1px solid #555;
+}
+
+#board > div {
+    width: 29px;
+    height: 29px;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+
+#board > div:nth-child(10n) {
+    border-right: none;
+}
+
+#board > div:nth-child(90) ~ div {
+    border-bottom: none;
+}
+
+#board > #block {
+    position: absolute;
+    border: none;
+}
+
+/* 不同的方向用不同的类名来表示 */
+#block.up > div:first-child,
+#block.down > div:last-child {
+    height: 30%;
+    background: blue;
+}
+
+#block.up > div:last-child,
+#block.down > div:first-child {
+    height: 70%;
+    background: red;
+}
+
+#block.left > div:first-child,
+#block.right > div:first-child {
+    float: left;
+}
+
+#block.left > div:last-child,
+#block.right > div:last-child {
+    float: right;
+}
+
+#block.left > div:first-child,
+#block.right > div:last-child {
+    height: 100%;
+    width: 30%;
+    background: blue;
+}
+
+#block.left > div:last-child,
+#block.right > div:first-child {
+    height: 100%;
+    width: 70%;
+    background: red;
+}
+
+.operate {
+    display: flex;
+    margin-left: 28px;
+}
+
+.operate > button {
+    margin-left: 12px;
+}
+
+/* 转向的动画 */
+@keyframes turn-left {
+    to {
+        transform: rotate(-0.25turn);
+    }
+}
+
+@keyframes turn-right {
+    to {
+        transform: rotate(0.25turn);
+    }
+}
+
+@keyframes turn-back {
+    to {
+        transform: rotate(0.5turn);
+    }
+}
+
+/* 平移的动画 */
+@keyframes go-up {
+    to {
+        transform: translateY(-30px);
+    }
+}
+
+@keyframes go-down {
+    to {
+        transform: translateY(30px);
+    }
+}
+
+@keyframes go-left {
+    to {
+        transform: translateX(-30px);
+    }
+}
+
+@keyframes go-right {
+    to {
+        transform: translateX(30px);
+    }
+}

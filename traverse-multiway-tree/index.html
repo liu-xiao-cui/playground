@@ -1,0 +1,198 @@
+<!DOCTYPE>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>遍历多叉树</title>
+    <style>
+        #container div {
+            display: flex;
+            border: 1px solid black;
+            padding: 8px 4px;
+            margin: 4px;
+            background: white;
+        }
+
+        #container > div {
+            min-height: 200px;
+        }
+
+        #container > div div {
+            flex-grow: 1;
+            flex-wrap: wrap;
+        }
+
+        #container div.active {
+            background-color: lightblue;
+        }
+
+        #container div.done {
+            background-color: lightgreen;
+        }
+
+        #container div.find {
+            background-color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <br />
+    <button id="forward-btn">前序</button>
+    <button id="backward-btn">后序</button> &nbsp;&nbsp;&nbsp;&nbsp;
+    <input type="text" id='input' />
+    <button id="search-btn">查询</button>
+
+    <script src="utils.js"></script>
+    <script src="treeConfig.js"></script>
+    <script type="text/javascript">
+        // 是否有匹配到查询的内容（暴露为全局变量）
+        hasMatched = false
+    
+        function main() {
+            initiateContainer()
+            addBtnListener()
+        }
+
+        // 初始化 container
+        function initiateContainer() {
+            container.innerHTML = mapChildrenToHtml([treeConfig])
+            container.firstElementChild.id = 'treeRoot'
+        }
+        // 把 treeConfig 中的 children 给解析成 html
+        function mapChildrenToHtml(children) {
+            return children.map(item => {
+                const {text, children} = item
+                return `
+                    <div>
+                        ${text}
+                        ${mapChildrenToHtml(children)}
+                    </div>
+                `
+            }).join('')
+        }
+
+        // 监听按钮的点击事件
+        function addBtnListener() {
+            [
+                ['forward-btn', forwardTraverse],
+                ['backward-btn', backwardTraversal],
+                ['search-btn', onSearch],
+            ].forEach(item => {
+                const [id, callback] = item
+                const btn = document.querySelector(`#${id}`)
+                btn.addEventListener('click', callback)
+            })
+            // 监听输入过程中按下 enter
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Enter' && document.activeElement.id === 'input') {
+                    onSearch()
+                }
+            })
+        }
+        // 前序遍历
+        function forwardTraverse() {
+            const startEle = treeRoot
+            runTraversal(startEle, getNextForwardTraversalEle)
+        }
+        // 后序遍历
+        function backwardTraversal() {
+            const startEle = getMostLeftEle(treeRoot)
+            runTraversal(startEle, getNextBackwardTraversalEle)
+        }
+        // 进行遍历
+        // 不同的遍历方法传进来的 getNextTraversalEle 不一样
+        function runTraversal(element, getNextTraversalEle) {
+            element.className = 'active'
+            setTimeout(() => {
+                element.className = 'done'
+                setTimeout(() => {
+                    const nextEle = getNextTraversalEle(element)
+                    if (nextEle) {
+                        runTraversal(nextEle, getNextTraversalEle)
+                    } else {
+                        // 重新初始化（为了清掉类名）
+                        initiateContainer()
+                    }
+                }, 600)
+            }, 600)
+        }
+        // 拿到进行前序遍历的下一个元素
+        function getNextForwardTraversalEle(element) {
+            // 有左子节点 --> 左子节点
+            // 没有左子节点 且 有右兄弟节点 --> 右兄弟节点
+            // 没有左子节点 且 没有右兄弟节点 --> 第一个有兄弟节点的父节点的兄弟节点  --> 父节点等于容器则表示遍历结束
+            if (element.firstElementChild) {
+                return element.firstElementChild
+            }
+            if (element.nextElementSibling) {
+                return element.nextElementSibling
+            }
+            let end = false
+            let parent = element.parentElement
+            while (!end) {
+                if (parent === treeRoot) {
+                    return
+                }
+                const nextElementSibling = parent.nextElementSibling
+                if (nextElementSibling) {
+                    end = true
+                } else {
+                    parent = parent.parentElement
+                }
+            }
+            return parent.nextElementSibling
+        }
+        // 拿到进行后序遍历的下一个元素
+        function getNextBackwardTraversalEle(element) {
+            // 没有右兄弟节点 --> 父节点 --> 父节点等于容器则表示遍历结束
+            // 有右兄弟节点 --> 右兄弟节点的根左节点
+            if (element === treeRoot) {
+                return
+            }
+            if (!element.nextElementSibling) {
+                return element.parentElement
+            }
+            return getMostLeftEle(element.nextElementSibling)
+        }
+        // 查询
+        function onSearch() {
+            const value = input.value
+            if (!value) {
+                alert('请先输入查询内容')
+                return
+            }
+            // 重新初始化（为了清掉类名）
+            initiateContainer()
+            hasMatched = false
+            runTraversalForSearch(treeRoot, value)
+        }
+        // 为了搜索的遍历
+        function runTraversalForSearch(element, search) {
+            element.className = 'active'
+            setTimeout(() => {
+                element.className = ''
+                const text = element.childNodes[0].textContent
+                if (text.includes(search)) {
+                    element.className = 'find'
+                    hasMatched = true
+                }
+                setTimeout(() => {
+                    const nextEle = getNextForwardTraversalEle(element)
+                    if (nextEle) {
+                        runTraversalForSearch(nextEle, search)
+                        return
+                    }
+                    if (!hasMatched) {
+                        alert('未匹配到搜索内容')
+                    }
+                }, 600)
+            }, 600)
+        }
+
+        main()
+    </script>
+</body>
+
+</html>

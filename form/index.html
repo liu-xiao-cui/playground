@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>form 组件</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="container"></div>
+
+    <script src="utils.js"></script>
+    <script src="form.js"></script>
+    <script>
+        // 实例化一个 form
+        const form = new Form()
+        // 定义表单项
+        const formItems = [{
+            key: 'name',
+            label: '名称',
+            help: '必填，长度为4~16个字符',
+            passedMsg: '名称可用',
+            rules: [{
+                required: true, message: '名称不能为空',
+            }, {
+                min: 4, message: '名称长度不能小于4',
+            }, {
+                max: 16, message: '名称长度不能大于16',
+            }],
+        }, {
+            key: 'password',
+            label: '密码',
+            inputType: 'password',
+            help: '必填，长度为6~20个字符，只能包含英文和数字',
+            passedMsg: '密码可用',
+            rules: [{
+                required: true, message: '密码不能为空',
+            }, {
+                pattern: /^[0-9a-zA-Z]+$/, message: '密码只能包含英文和数字',
+            }, {
+                min: 6, message: '密码长度不能小于6',
+            }, {
+                max: 20, message: '密码长度不能大于20',
+            }],
+        }, {
+            key: 'passwordAgain',
+            label: '密码确认',
+            inputType: 'password',
+            help: '再次输入相同密码',
+            passedMsg: '密码输入一致',
+            rules: [{
+                required: true, message: '密码不能为空',
+            }, {
+                validator: value => value === form.getFieldValue('password'), message: '密码输入不一致',
+            }],
+        }, {
+            key: 'email',
+            label: '邮箱',
+            help: '必填，请输入有效的邮箱地址',
+            passedMsg: '邮箱可用',
+            rules: [{
+                required: true, message: '邮箱不能为空',
+            }, {
+                pattern: /@/, message: '邮箱格式错误',
+            }],
+        }, {
+            key: 'phone',
+            label: '手机',
+            help: '必填，请输入手机号',
+            passedMsg: '手机号可用',
+            rules: [{
+                required: true, message: '手机号不能为空',
+            }, {
+                pattern: /^1[0-9]{10}$/, message: '手机号格式错误',
+            }],
+        }]
+        // 根据表单项初始化，即挂载到 container 下
+        form.create(container, formItems)
+        // 加上提交按钮
+        const submitBtn = createElementWithText('button', '提交')
+        submitBtn.className = 'submit-btn'
+        submitBtn.addEventListener('click', () => {
+            const result = form.validateAll()
+            const msg = result ? '提交成功' : '提交失败'
+            // 用 setTimeout 来避免在 alert 时 dom 还没渲染好
+            setTimeout(() => alert(msg), 100)
+        })
+        container.insertAdjacentElement('beforeend', submitBtn)
+    </script>
+</body>
+
+</html>
