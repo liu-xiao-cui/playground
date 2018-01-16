@@ -20,7 +20,7 @@
 
 ## modal 组件
 
-封装一个 table 组件，支持排序。
+封装一个 modal 组件，支持拖动，支持缩放。
 
 题目来自于 IFE：<a href="http://ife.baidu.com/course/detail/id/115" target="_blank">http://ife.baidu.com/course/detail/id/115</a>
 
